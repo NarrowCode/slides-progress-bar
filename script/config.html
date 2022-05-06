@@ -1,0 +1,124 @@
+<!--
+ * Copyright 2022 Andreas Steinkellner
+ * Copyright Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * 
+ * The basic idea for the implementation of this code was obtained
+ * from these two tutorial pages:
+ * https://developers.google.com/apps-script/add-ons/editors/slides/quickstart/progress-bar
+ * https://developers.google.com/apps-script/add-ons/editors/slides/quickstart/translate
+ * and was modified by Andreas Steinkellner to:
+ *    o) Add additional functionality
+ *    o) Simplify configuration
+ *    o) Add html config dialog
+-->
+
+<html>
+<head>
+  <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
+</head>
+<body>
+<form class="sidebar branding-below">
+  <h1>Progress Bar Configuration</h1>
+  <div class="block" id="button-bar">
+    <button class="blue" id="refresh-progress">Refresh</button>
+    <button id="show-progress">Show</button>
+    <button id="hide-progress">Hide</button>
+  </div>
+  <h2>Skip settings:</h2>
+  <div class="block" id="chk-skip">
+    How many slides to skip at the start?</br>
+    <input type="text" id="skip-start"></br></br>
+    How many slides to skip at the end?</br>
+    <input type="text" id="skip-end"></br></br>
+    Bar height (px)</br>
+    <input type="text" id="bar-height"></br></br>
+    Font size (pt)</br>
+    <input type="text" id="font-size"></br></br>
+    Font color (hex)</br>
+    <input type="text" id="font-color"></br></br>
+    Text margin</br>
+    <input type="text" id="text-margin"></br></br>
+    Left-align</br>
+    <input type="checkbox" id="left-align"></br></br>
+    Include progress percentage</br>
+    <input type="checkbox" id="include-percentage">
+  </div>
+</form>
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script>
+  $(function() {
+    google.script.run.withSuccessHandler((v,element) => {
+      $('#skip-start').val(v);
+    }).withUserObject(this).getDefaultSkipStart();
+
+    google.script.run.withSuccessHandler((v,element) => {
+      $('#skip-end').val(v);
+    }).withUserObject(this).getDefaultSkipEnd();
+
+    google.script.run.withSuccessHandler((v,element) => {
+      $('#bar-height').val(v);
+    }).withUserObject(this).getDefaultBarHeight();
+
+    google.script.run.withSuccessHandler((v,element) => {
+      $('#font-size').val(v);
+    }).withUserObject(this).getDefaultFontSize();
+
+    google.script.run.withSuccessHandler((v,element) => {
+      $('#font-color').val(v);
+    }).withUserObject(this).getDefaultFontColor();
+
+    google.script.run.withSuccessHandler((v,element) => {
+      $('#text-margin').val(v);
+    }).withUserObject(this).getDefaultTextMargin();
+
+    google.script.run.withSuccessHandler((v,element) => {
+      $('#left-align').prop('checked', v);
+    }).withUserObject(this).getDefaultLeftAlign();
+
+    google.script.run.withSuccessHandler((v,element) => {
+      $('#include-percentage').prop('checked', v);
+    }).withUserObject(this).getDefaultIncludePercentage();
+
+    $('#hide-progress').click(deleteBars);
+    $('#show-progress').click(showBars);
+    $('#refresh-progress').click(refreshBars);
+  });
+
+  function deleteBars() {
+    this.disabled = true;
+    google.script.run.withSuccessHandler((s,element) => {
+      element.disabled = false;
+    }).withUserObject(this).deleteBars(); 
+  }
+
+  function showBars() {
+    this.disabled = true;
+    google.script.run.withSuccessHandler((_,element) => {
+      element.disabled = false;
+    }).withUserObject(this).createBars(parseInt($('#skip-start').val()),
+parseInt($('#skip-end').val()), parseInt($('#bar-height').val()), parseInt($('#font-size').val()), $('#font-color').val().toString(), $('#left-align').prop('checked'), parseInt($('#text-margin').val()), $('#include-percentage').prop('checked'));
+  }
+
+  function refreshBars() {
+    this.disabled = true;
+    google.script.run.withSuccessHandler((_,element) => {
+      showBars();
+      element.disabled = false;
+    }).withUserObject(this).deleteBars();
+  }
+</script>
+</body>
+</html>
